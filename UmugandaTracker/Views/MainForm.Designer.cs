@@ -46,12 +46,13 @@
             // 
             // btnZones
             // 
-            this.btnZones.Location = new System.Drawing.Point(29, 69);
+            this.btnZones.Location = new System.Drawing.Point(28, 69);
             this.btnZones.Name = "btnZones";
             this.btnZones.Size = new System.Drawing.Size(75, 23);
             this.btnZones.TabIndex = 1;
             this.btnZones.Text = "Zones";
             this.btnZones.UseVisualStyleBackColor = true;
+            this.btnZones.Click += new System.EventHandler(this.btnZones_Click);
             // 
             // btnCheckIn
             // 
@@ -61,6 +62,7 @@
             this.btnCheckIn.TabIndex = 2;
             this.btnCheckIn.Text = "Check-In";
             this.btnCheckIn.UseVisualStyleBackColor = true;
+            this.btnCheckIn.Click += new System.EventHandler(this.btnCheckIn_Click);
             // 
             // btnEvents
             // 
@@ -70,6 +72,7 @@
             this.btnEvents.TabIndex = 3;
             this.btnEvents.Text = "Events";
             this.btnEvents.UseVisualStyleBackColor = true;
+            this.btnEvents.Click += new System.EventHandler(this.btnEvents_Click);
             // 
             // btnUsers
             // 
@@ -79,6 +82,7 @@
             this.btnUsers.TabIndex = 4;
             this.btnUsers.Text = "Users";
             this.btnUsers.UseVisualStyleBackColor = true;
+            this.btnUsers.Click += new System.EventHandler(this.btnUsers_Click);
             // 
             // MainForm
             // 

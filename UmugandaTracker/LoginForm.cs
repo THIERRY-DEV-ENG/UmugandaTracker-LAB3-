@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows.Forms;
 using UmugandaTracker.Controllers;
 using UmugandaTracker.Models;
@@ -37,6 +37,7 @@ namespace UmugandaTracker.Views
 
 
             MainForm main = new MainForm(user);
+            main.FormClosed += (s, args) => this.Close();
             main.Show();
             this.Hide();
         }
