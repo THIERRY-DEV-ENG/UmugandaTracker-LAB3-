@@ -1,4 +1,4 @@
-﻿namespace UmugandaTracker.Views
+namespace UmugandaTracker.Views
 {
     partial class ZoneForm
     {
