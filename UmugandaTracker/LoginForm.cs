@@ -25,21 +25,27 @@ namespace UmugandaTracker.Views
                 return;
             }
 
-            User user = _auth.Login(username, password);
-
-            if (user == null)
+            try
             {
-                MessageBox.Show("Invalid username or password.");
-                return;
+                User user = _auth.Login(username, password);
+
+                if (user == null)
+                {
+                    MessageBox.Show("Invalid username or password.");
+                    return;
+                }
+
+                MessageBox.Show("Login Successful! Welcome " + user.FullName);
+
+                MainForm main = new MainForm(user);
+                main.FormClosed += (s, args) => this.Close();
+                main.Show();
+                this.Hide();
             }
-
-            MessageBox.Show("Login Successful! Welcome " + user.FullName);
-
-
-            MainForm main = new MainForm(user);
-            main.FormClosed += (s, args) => this.Close();
-            main.Show();
-            this.Hide();
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to connect to the database. Please make sure MySQL is running in XAMPP.\n\n" + ex.Message, "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
