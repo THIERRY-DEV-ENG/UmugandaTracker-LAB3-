@@ -12,7 +12,6 @@ namespace UmugandaTracker
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            // THIS MUST BE LoginForm
             Application.Run(new LoginForm());
         }
     }

@@ -14,6 +14,17 @@ namespace UmugandaTracker.Views
             InitializeComponent();
             _currentUser = user;
             this.Text = "Umuganda Tracker - " + user.FullName;
+            ApplyRolePermissions();
+        }
+
+        private void ApplyRolePermissions()
+        {
+            if (_currentUser != null && _currentUser.Role == "Member")
+            {
+                btnZones.Visible = false;
+                btnUsers.Visible = false;
+                btnEvents.Visible = false;
+            }
         }
 
         private void btnZones_Click(object sender, EventArgs e)
@@ -38,6 +49,12 @@ namespace UmugandaTracker.Views
         {
             CheckInForm checkInForm = new CheckInForm();
             checkInForm.ShowDialog();
+        }
+
+        private void btnReports_Click(object sender, EventArgs e)
+        {
+            ReportForm reportForm = new ReportForm();
+            reportForm.ShowDialog();
         }
     }
 }

@@ -22,8 +22,8 @@ namespace UmugandaTracker.Views
             try
             {
                 cmbZone.DataSource = _zoneCtrl.GetAll();
-                cmbZone.DisplayMember = "ZoneName"; // Show the name in the dropdown
-                cmbZone.ValueMember = "ZoneID";    // Use the ID behind the scenes
+                cmbZone.DisplayMember = "ZoneName";
+                cmbZone.ValueMember = "ZoneID";
             }
             catch (Exception ex)
             {

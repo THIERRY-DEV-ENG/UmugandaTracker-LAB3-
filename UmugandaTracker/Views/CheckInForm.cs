@@ -15,11 +15,9 @@ namespace UmugandaTracker.Views
         {
             InitializeComponent();
 
-            // Add Statuses
             cmbStatus.Items.AddRange(new[] { "Present", "Absent" });
             cmbStatus.SelectedIndex = 0;
 
-            // Load Events and Users into the dropdowns
             LoadDropdowns();
             LoadData();
         }
