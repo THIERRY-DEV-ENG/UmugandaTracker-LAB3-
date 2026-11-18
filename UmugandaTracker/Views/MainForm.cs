@@ -47,7 +47,7 @@ namespace UmugandaTracker.Views
 
         private void btnCheckIn_Click(object sender, EventArgs e)
         {
-            CheckInForm checkInForm = new CheckInForm();
+            CheckInForm checkInForm = new CheckInForm(_currentUser);
             checkInForm.ShowDialog();
         }
 

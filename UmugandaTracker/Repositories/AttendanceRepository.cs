@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using MySqlConnector;
 using UmugandaTracker.Models;
 
@@ -12,7 +13,7 @@ namespace UmugandaTracker.Repositories
             using (var con = Database.GetConnection())
             {
                 con.Open();
-                using (var cmd = new MySqlCommand("SELECT * FROM Attendance", con))
+                using (var cmd = new MySqlCommand("SELECT * FROM Attendance ORDER BY AttendanceID DESC", con))
                 using (var r = cmd.ExecuteReader())
                     while (r.Read())
                         list.Add(new AttendanceRecord
@@ -40,6 +41,43 @@ namespace UmugandaTracker.Repositories
                     return cmd.ExecuteNonQuery();
                 }
             }
+        }
+
+        public int Update(AttendanceRecord a)
+        {
+            using (var con = Database.GetConnection())
+            {
+                con.Open();
+                string q = "UPDATE Attendance SET EventID=@e, UserID=@u, Status=@s WHERE AttendanceID=@id";
+                using (var cmd = new MySqlCommand(q, con))
+                {
+                    cmd.Parameters.AddWithValue("@e", a.EventID);
+                    cmd.Parameters.AddWithValue("@u", a.UserID);
+                    cmd.Parameters.AddWithValue("@s", a.Status);
+                    cmd.Parameters.AddWithValue("@id", a.AttendanceID);
+                    return cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public DataTable GetReport()
+        {
+            var dt = new DataTable();
+            using (var con = Database.GetConnection())
+            {
+                con.Open();
+                string q = @"SELECT a.AttendanceID, e.EventName, u.FullName AS CitizenName, e.EventDate, a.Status 
+                             FROM Attendance a 
+                             LEFT JOIN UmugandaEvents e ON a.EventID = e.EventID 
+                             LEFT JOIN Users u ON a.UserID = u.UserID 
+                             ORDER BY a.AttendanceID DESC";
+                using (var cmd = new MySqlCommand(q, con))
+                using (var da = new MySqlDataAdapter(cmd))
+                {
+                    da.Fill(dt);
+                }
+            }
+            return dt;
         }
 
         public int CountByEvent(int eventId)

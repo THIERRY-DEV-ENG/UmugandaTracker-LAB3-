@@ -1,7 +1,6 @@
 using System;
 using System.Windows.Forms;
 using UmugandaTracker.Controllers;
-using UmugandaTracker.Models;
 
 namespace UmugandaTracker.Views
 {
@@ -20,10 +19,10 @@ namespace UmugandaTracker.Views
         {
             try
             {
-                var records = _ctrl.GetAll();
+                var dt = _ctrl.GetReport();
                 dgvReport.DataSource = null;
-                dgvReport.DataSource = records;
-                lblTotal.Text = "Total Records: " + records.Count;
+                dgvReport.DataSource = dt;
+                lblTotal.Text = "Total Records: " + dt.Rows.Count;
             }
             catch (Exception ex)
             {
