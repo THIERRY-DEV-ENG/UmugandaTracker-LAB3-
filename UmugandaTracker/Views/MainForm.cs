@@ -1,4 +1,5 @@
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using UmugandaTracker.Models;
 using UmugandaTracker.Views;
@@ -13,7 +14,7 @@ namespace UmugandaTracker.Views
         {
             InitializeComponent();
             _currentUser = user;
-            this.Text = "Umuganda Tracker - " + user.FullName;
+            this.Text = "Umuganda Tracker - " + user.FullName + " (" + user.Role + ")";
             ApplyRolePermissions();
         }
 
@@ -24,6 +25,10 @@ namespace UmugandaTracker.Views
                 btnZones.Visible = false;
                 btnUsers.Visible = false;
                 btnEvents.Visible = false;
+
+                btnCheckIn.Location = new Point(145, 140);
+                btnReports.Location = new Point(360, 140);
+                this.ClientSize = new Size(680, 240);
             }
         }
 
