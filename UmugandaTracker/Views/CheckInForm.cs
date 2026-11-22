@@ -11,7 +11,6 @@ namespace UmugandaTracker.Views
         private readonly EventController _eventCtrl = new EventController();
         private readonly UserController _userCtrl = new UserController();
         private readonly User _currentUser;
-        private int _selectedAttendanceID = 0;
 
         public CheckInForm() : this(null)
         {
@@ -22,7 +21,6 @@ namespace UmugandaTracker.Views
             InitializeComponent();
             _currentUser = currentUser;
 
-            cmbStatus.SelectedIndex = 0;
             LoadDropdowns();
             ApplyMemberRestriction();
             LoadData();
@@ -41,17 +39,30 @@ namespace UmugandaTracker.Views
         {
             try
             {
-                cmbEvent.DataSource = _eventCtrl.GetAll();
-                cmbEvent.DisplayMember = "EventName";
+                var events = _eventCtrl.GetAll();
+                cmbEvent.DataSource = events;
+                cmbEvent.DisplayMember = "DisplayText";
                 cmbEvent.ValueMember = "EventID";
 
                 cmbUser.DataSource = _userCtrl.GetAll();
                 cmbUser.DisplayMember = "FullName";
                 cmbUser.ValueMember = "UserID";
+
+                UpdateSiteDetails();
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error loading dropdown data: " + ex.Message);
+            }
+        }
+
+        private void UpdateSiteDetails()
+        {
+            if (cmbEvent.SelectedItem is UmugandaEvent ev)
+            {
+                string zone = string.IsNullOrEmpty(ev.ZoneName) ? "Unassigned" : ev.ZoneName;
+                string loc = string.IsNullOrEmpty(ev.Location) ? "Not Specified" : ev.Location;
+                lblSiteDetails.Text = "Date: " + ev.EventDate.ToString("dd/MM/yyyy") + "  |  Zone: " + zone + " (" + loc + ")";
             }
         }
 
@@ -68,86 +79,95 @@ namespace UmugandaTracker.Views
             }
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void cmbEvent_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cmbEvent.SelectedValue == null || cmbUser.SelectedValue == null || cmbStatus.SelectedItem == null)
+            UpdateSiteDetails();
+        }
+
+        private void btnCheckIn_Click(object sender, EventArgs e)
+        {
+            if (cmbEvent.SelectedValue == null || cmbUser.SelectedValue == null)
             {
-                MessageBox.Show("Please select an Event, a Citizen, and a Status.");
+                MessageBox.Show("Please select an Event and a Citizen.");
                 return;
             }
 
+            int eventId = Convert.ToInt32(cmbEvent.SelectedValue);
+            int userId = Convert.ToInt32(cmbUser.SelectedValue);
+
             try
             {
+                var existing = _attCtrl.GetByEventAndUser(eventId, userId);
+
+                if (existing != null)
+                {
+                    MessageBox.Show("You have already checked in for this Umuganda event! Status: " + existing.Status);
+                    return;
+                }
+
+                string timeStr = DateTime.Now.ToString("hh:mm tt");
                 AttendanceRecord record = new AttendanceRecord
                 {
-                    AttendanceID = _selectedAttendanceID,
-                    EventID = Convert.ToInt32(cmbEvent.SelectedValue),
-                    UserID = Convert.ToInt32(cmbUser.SelectedValue),
-                    Status = cmbStatus.SelectedItem.ToString()
+                    EventID = eventId,
+                    UserID = userId,
+                    Status = "Checked-In (" + timeStr + ")"
                 };
 
-                if (_selectedAttendanceID == 0)
-                {
-                    _attCtrl.Add(record);
-                    MessageBox.Show("Attendance recorded successfully!");
-                }
-                else
-                {
-                    _attCtrl.Update(record);
-                    MessageBox.Show("Attendance status updated successfully!");
-                }
-
-                ClearForm();
+                _attCtrl.Add(record);
+                MessageBox.Show("Checked-In successfully at " + timeStr + "! Welcome to Umuganda.");
                 LoadData();
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving attendance: " + ex.Message);
+                MessageBox.Show("Error during Check-In: " + ex.Message);
             }
         }
 
-        private void btnClear_Click(object sender, EventArgs e)
+        private void btnCheckOut_Click(object sender, EventArgs e)
         {
-            ClearForm();
+            if (cmbEvent.SelectedValue == null || cmbUser.SelectedValue == null)
+            {
+                MessageBox.Show("Please select an Event and a Citizen.");
+                return;
+            }
+
+            int eventId = Convert.ToInt32(cmbEvent.SelectedValue);
+            int userId = Convert.ToInt32(cmbUser.SelectedValue);
+
+            try
+            {
+                var existing = _attCtrl.GetByEventAndUser(eventId, userId);
+
+                if (existing == null)
+                {
+                    MessageBox.Show("You cannot Check-Out! You must Check-In first when you arrive.");
+                    return;
+                }
+
+                if (existing.Status.StartsWith("Checked-Out"))
+                {
+                    MessageBox.Show("You have already checked out and completed this Umuganda event!");
+                    return;
+                }
+
+                string timeStr = DateTime.Now.ToString("hh:mm tt");
+                existing.Status = "Checked-Out (" + timeStr + ")";
+
+                _attCtrl.Update(existing);
+                MessageBox.Show("Checked-Out successfully at " + timeStr + "! Thank you for serving your community.");
+                LoadData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error during Check-Out: " + ex.Message);
+            }
         }
 
         private void btnRefresh_Click(object sender, EventArgs e)
         {
-            ClearForm();
             LoadDropdowns();
             ApplyMemberRestriction();
             LoadData();
-        }
-
-        private void dgvAttendance_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex >= 0 && dgvAttendance.Rows[e.RowIndex].Cells["AttendanceID"].Value != null)
-            {
-                var row = dgvAttendance.Rows[e.RowIndex];
-                _selectedAttendanceID = Convert.ToInt32(row.Cells["AttendanceID"].Value);
-
-                string status = row.Cells["Status"].Value?.ToString();
-                if (!string.IsNullOrEmpty(status) && cmbStatus.Items.Contains(status))
-                {
-                    cmbStatus.SelectedItem = status;
-                }
-            }
-        }
-
-        private void ClearForm()
-        {
-            _selectedAttendanceID = 0;
-            if (cmbStatus.Items.Count > 0)
-            {
-                cmbStatus.SelectedIndex = 0;
-            }
-            if (_currentUser == null || _currentUser.Role != "Member")
-            {
-                if (cmbUser.Items.Count > 0)
-                {
-                    cmbUser.SelectedIndex = 0;
-                }
-            }
         }
     }
 }

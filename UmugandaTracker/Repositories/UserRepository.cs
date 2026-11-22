@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using MySqlConnector;
 using UmugandaTracker.Models;
 
@@ -34,6 +35,19 @@ namespace UmugandaTracker.Repositories
                 }
             }
             return false;
+        }
+
+        public bool UsernameExists(string username)
+        {
+            using (var con = Database.GetConnection())
+            {
+                con.Open();
+                using (var cmd = new MySqlCommand("SELECT COUNT(*) FROM Users WHERE Username=@u", con))
+                {
+                    cmd.Parameters.AddWithValue("@u", username);
+                    return Convert.ToInt32(cmd.ExecuteScalar()) > 0;
+                }
+            }
         }
 
         public List<User> GetAll()

@@ -27,6 +27,34 @@ namespace UmugandaTracker.Repositories
             return list;
         }
 
+        public AttendanceRecord GetByEventAndUser(int eventId, int userId)
+        {
+            using (var con = Database.GetConnection())
+            {
+                con.Open();
+                string q = "SELECT * FROM Attendance WHERE EventID=@e AND UserID=@u LIMIT 1";
+                using (var cmd = new MySqlCommand(q, con))
+                {
+                    cmd.Parameters.AddWithValue("@e", eventId);
+                    cmd.Parameters.AddWithValue("@u", userId);
+                    using (var r = cmd.ExecuteReader())
+                    {
+                        if (r.Read())
+                        {
+                            return new AttendanceRecord
+                            {
+                                AttendanceID = r.GetInt32("AttendanceID"),
+                                EventID = r.GetInt32("EventID"),
+                                UserID = r.GetInt32("UserID"),
+                                Status = r.GetString("Status")
+                            };
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
         public int Add(AttendanceRecord a)
         {
             using (var con = Database.GetConnection())
@@ -66,9 +94,10 @@ namespace UmugandaTracker.Repositories
             using (var con = Database.GetConnection())
             {
                 con.Open();
-                string q = @"SELECT a.AttendanceID, e.EventName, u.FullName AS CitizenName, e.EventDate, a.Status 
+                string q = @"SELECT a.AttendanceID, e.EventName, z.ZoneName, u.FullName AS CitizenName, e.EventDate, a.Status 
                              FROM Attendance a 
                              LEFT JOIN UmugandaEvents e ON a.EventID = e.EventID 
+                             LEFT JOIN Zones z ON e.ZoneID = z.ZoneID 
                              LEFT JOIN Users u ON a.UserID = u.UserID 
                              ORDER BY a.AttendanceID DESC";
                 using (var cmd = new MySqlCommand(q, con))

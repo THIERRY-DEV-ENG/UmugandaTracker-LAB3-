@@ -12,7 +12,11 @@ namespace UmugandaTracker.Repositories
             using (var con = Database.GetConnection())
             {
                 con.Open();
-                using (var cmd = new MySqlCommand("SELECT * FROM UmugandaEvents ORDER BY EventID", con))
+                string q = @"SELECT e.EventID, e.EventName, e.EventDate, e.ZoneID, z.ZoneName, z.Location 
+                             FROM UmugandaEvents e 
+                             LEFT JOIN Zones z ON e.ZoneID = z.ZoneID 
+                             ORDER BY e.EventDate DESC";
+                using (var cmd = new MySqlCommand(q, con))
                 using (var r = cmd.ExecuteReader())
                     while (r.Read())
                         list.Add(new UmugandaEvent
@@ -20,7 +24,9 @@ namespace UmugandaTracker.Repositories
                             EventID = r.GetInt32("EventID"),
                             EventName = r.GetString("EventName"),
                             EventDate = r.GetDateTime("EventDate"),
-                            ZoneID = r.GetInt32("ZoneID")
+                            ZoneID = r.GetInt32("ZoneID"),
+                            ZoneName = r.IsDBNull(r.GetOrdinal("ZoneName")) ? "" : r.GetString("ZoneName"),
+                            Location = r.IsDBNull(r.GetOrdinal("Location")) ? "" : r.GetString("Location")
                         });
             }
             return list;
@@ -78,7 +84,11 @@ namespace UmugandaTracker.Repositories
             using (var con = Database.GetConnection())
             {
                 con.Open();
-                string q = "SELECT * FROM UmugandaEvents WHERE EventName LIKE @k ORDER BY EventID";
+                string q = @"SELECT e.EventID, e.EventName, e.EventDate, e.ZoneID, z.ZoneName, z.Location 
+                             FROM UmugandaEvents e 
+                             LEFT JOIN Zones z ON e.ZoneID = z.ZoneID 
+                             WHERE e.EventName LIKE @k OR z.ZoneName LIKE @k OR z.Location LIKE @k 
+                             ORDER BY e.EventDate DESC";
                 using (var cmd = new MySqlCommand(q, con))
                 {
                     cmd.Parameters.AddWithValue("@k", "%" + keyword + "%");
@@ -89,7 +99,9 @@ namespace UmugandaTracker.Repositories
                                 EventID = r.GetInt32("EventID"),
                                 EventName = r.GetString("EventName"),
                                 EventDate = r.GetDateTime("EventDate"),
-                                ZoneID = r.GetInt32("ZoneID")
+                                ZoneID = r.GetInt32("ZoneID"),
+                                ZoneName = r.IsDBNull(r.GetOrdinal("ZoneName")) ? "" : r.GetString("ZoneName"),
+                                Location = r.IsDBNull(r.GetOrdinal("Location")) ? "" : r.GetString("Location")
                             });
                 }
             }

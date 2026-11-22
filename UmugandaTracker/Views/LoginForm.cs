@@ -47,5 +47,11 @@ namespace UmugandaTracker.Views
                 MessageBox.Show("Unable to connect to the database. Please make sure MySQL is running in XAMPP.\n\n" + ex.Message, "Connection Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void btnRegister_Click(object sender, EventArgs e)
+        {
+            RegisterForm regForm = new RegisterForm();
+            regForm.ShowDialog();
+        }
     }
 }
